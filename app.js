@@ -30,7 +30,7 @@ const reviewRoutes = require('./routes/reviews');
 
 const MongoStore = require('connect-mongo');
 
-const dbUrl = 'mongodb://admin:ricoh@localhost:27017/yelp-camp?authSource=admin';
+const dbUrl = process.env.DB_URL || 'mongodb://admin:ricoh@localhost:27017/yelp-camp?authSource=admin';
 
 mongoose.connect(dbUrl,
     { 
@@ -63,11 +63,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 //     replaceWith: '_',
 // }));
 
+const secret = process.env.SECRET || 'thisshouldbeabettersecret!';
+
 const store = MongoStore.create({
     mongoUrl: dbUrl,
     touchAfter: 24 * 60 * 60,  // 24時間ごとにセッションを更新
     crypto: {
-        secret: 'thisshouldbeabettersecret!'
+        secret
     }
 });
 
@@ -79,7 +81,7 @@ store.on('error', e => {
 const sessionConfig = {
     store,
     name: 'session',
-    secret: 'mysecret',
+    secret,
     resave: false,
     saveUninitialized: true,
     cookie: {
